@@ -1,0 +1,131 @@
+.App {
+  font-family: 'Arial', sans-serif;
+  padding: 20px;
+  background-color: #f4f4f4;
+  max-width: 1200px;
+  margin: 20px auto;
+}
+
+.header-section {
+  background-color: #fff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-grow: 1;
+  justify-content: flex-start;
+  max-width: 250px;
+  flex-grow: 0;
+}
+
+.search-box input,
+.search-box button {
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.search-box input {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.search-box button {
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+  padding-left: 20px;
+  padding-right: 20px;
+  transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-box button:hover, .search-box button:focus {
+  background-color: #0056b3; 
+  border-color: #004080;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+
+.movie-poster {
+  position: relative;
+  max-width: 120px;
+}
+
+.movie-rank {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background-color: red;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 50px;
+  font-size: 1em;
+  font-weight: bold;
+}
+
+.movie-info {
+  flex: 1;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+li {
+  background-color: #fff;
+  margin-bottom: 20px;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  flex: 1 1 300px;
+  max-width: 300px;
+  width: 100%;
+}
+
+
+h3, p {
+  margin: 5px 0;
+}
+
+img {
+  width: 100px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+  .header-section, .search-box, .movie-info, .movie-poster, li {
+    padding: 10px; 
+  }
+  .search-box {
+    max-width: 100%;
+    flex-grow: 1;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+
+  li {
+    flex-basis: 100%;
+  }
+}
