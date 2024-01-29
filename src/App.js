@@ -42,31 +42,44 @@ function App() {
           movie.movieNm
         )}&releaseDts=${releaseDate}`;
 
-        const posterResponse = await axios.get(QUERY_URL);
-        const matchingMovies = posterResponse.data?.Data?.[0]?.Result?.filter(
-          (resultMovie) => {
-            const isTitleMatch =
-              cleanKMDbTitle(resultMovie.title) ===
-              cleanKMDbTitle(movie.movieNm);
-            const isYearMatch =
-              Math.abs(
-                Number(resultMovie.prodYear) -
-                  Number(movie.openDt.substring(0, 4))
-              ) <= 1;
+        try {
+          const posterResponse = await axios.get(QUERY_URL);
+          const matchingMovies = posterResponse.data?.Data?.[0]?.Result?.filter(
+            (resultMovie) => {
+              const isTitleMatch =
+                cleanKMDbTitle(resultMovie.title) ===
+                cleanKMDbTitle(movie.movieNm);
+              const isYearMatch =
+                Math.abs(
+                  Number(resultMovie.prodYear) -
+                    Number(movie.openDt.substring(0, 4))
+                ) <= 1;
 
-            return isTitleMatch && isYearMatch;
+              return isTitleMatch && isYearMatch;
+            }
+          );
+
+          if (matchingMovies && matchingMovies.length > 0) {
+            const posters = matchingMovies[0]?.posters;
+            const posterURL =
+              typeof posters === "string" ? posters.split("|")[0] : null;
+
+            return { ...movie, poster: posterURL };
+          } else {
+            // 포스터를 찾지 못한 영화에 대한 로그를 출력합니다.
+            console.log(
+              `Poster not found for movie: ${movie.movieNm} (Release Date: ${movie.openDt})`
+            );
+            return { ...movie, poster: null };
           }
-        );
-
-        if (matchingMovies && matchingMovies.length > 0) {
-          const posters = matchingMovies[0]?.posters;
-          const posterURL =
-            typeof posters === "string" ? posters.split("|")[0] : null;
-
-          return { ...movie, poster: posterURL };
+        } catch (error) {
+          // API 호출 중 발생한 에러에 대한 로그를 출력합니다.
+          console.error(
+            `Error fetching poster for movie: ${movie.movieNm}`,
+            error
+          );
+          return { ...movie, poster: null };
         }
-
-        return { ...movie, poster: null };
       })
     );
   };
