@@ -4,9 +4,14 @@ import "./App.css";
 import MovieList from "./MovieList";
 
 const cleanKMDbTitle = (title) => {
-  title = title.replace(/\!HS|\!HE/g, ""); // !HS와 !HE 제거
-  title = title.replace(/^\s+|\s+$/g, ""); // 앞뒤 공백 제거
-  title = title.replace(/ +/g, " "); // 여러 개의 공백을 하나로 줄임
+  // <!HS>와 <!HE> 특수 태그를 제거
+  title = title.replace(/<!HS>|<!HE>/g, "");
+  // !HS와 !HE 제거
+  title = title.replace(/\!HS|\!HE/g, "");
+  // 앞뒤 공백 제거
+  title = title.replace(/^\s+|\s+$/g, "");
+  // 여러 개의 공백을 하나로 줄임
+  title = title.replace(/ +/g, " ");
   return title;
 };
 
@@ -37,43 +42,43 @@ function App() {
   const fetchMoviePosters = async (movies, KOREAFILM_API_KEY) => {
     return await Promise.all(
       movies.map(async (movie) => {
-        const releaseDate = movie.openDt.replace(/-/g, ""); // "2023-08-15"를 "20230815" 형식으로 변환
+        const releaseDate = movie.openDt.replace(/-/g, "");
         const QUERY_URL = `https://api.koreafilm.or.kr/openapi-data2/wisenut/search_api/search_json2.jsp?collection=kmdb_new2&ServiceKey=${KOREAFILM_API_KEY}&detail=Y&query=${encodeURIComponent(
           movie.movieNm
         )}&releaseDts=${releaseDate}`;
 
         try {
           const posterResponse = await axios.get(QUERY_URL);
-          const matchingMovies = posterResponse.data?.Data?.[0]?.Result?.filter(
-            (resultMovie) => {
-              const isTitleMatch =
-                cleanKMDbTitle(resultMovie.title) ===
-                cleanKMDbTitle(movie.movieNm);
-              const isYearMatch =
-                Math.abs(
-                  Number(resultMovie.prodYear) -
-                    Number(movie.openDt.substring(0, 4))
-                ) <= 1;
+          const data = posterResponse.data?.Data?.[0];
+          const matchingMovies = data?.Result?.filter((resultMovie) => {
+            const isTitleMatch =
+              cleanKMDbTitle(resultMovie.title) ===
+              cleanKMDbTitle(movie.movieNm);
+            const isYearMatch =
+              Math.abs(
+                Number(resultMovie.prodYear) -
+                  Number(movie.openDt.substring(0, 4))
+              ) <= 1; // 개봉년도와 발매년도가 1년 이내 차이나는 경우에도 포함
 
-              return isTitleMatch && isYearMatch;
-            }
-          );
+            return isTitleMatch && isYearMatch;
+          });
 
           if (matchingMovies && matchingMovies.length > 0) {
-            const posters = matchingMovies[0]?.posters;
-            const posterURL =
-              typeof posters === "string" ? posters.split("|")[0] : null;
-
+            // posters 문자열에서 <![CDATA[ ... ]]> 태그 제거
+            const postersData = matchingMovies[0]?.posters.replace(
+              /<!\[CDATA\[|\]\]>/g,
+              ""
+            );
+            // '|' 문자를 기준으로 URL 분할
+            const postersUrls = postersData.split("|");
+            // 첫 번째 URL을 사용 (추가적인 로직이 필요한 경우 이 부분을 수정)
+            const posterURL = postersUrls.length > 0 ? postersUrls[0] : null;
             return { ...movie, poster: posterURL };
           } else {
-            // 포스터를 찾지 못한 영화에 대한 로그를 출력합니다.
-            console.log(
-              `Poster not found for movie: ${movie.movieNm} (Release Date: ${movie.openDt})`
-            );
+            console.log(`Poster not found for movie: ${movie.movieNm}`);
             return { ...movie, poster: null };
           }
         } catch (error) {
-          // API 호출 중 발생한 에러에 대한 로그를 출력합니다.
           console.error(
             `Error fetching poster for movie: ${movie.movieNm}`,
             error
